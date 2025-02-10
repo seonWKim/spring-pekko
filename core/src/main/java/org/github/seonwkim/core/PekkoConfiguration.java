@@ -82,30 +82,51 @@ public class PekkoConfiguration {
         }
 
         public static class Artery {
-            private String canonicalHostname;
-            private int canonicalPort;
+            private Canonical canonical;
 
-            public String getCanonicalHostname() {
-                return canonicalHostname;
+            public Canonical getCanonical() {
+                return canonical;
             }
 
-            public void setCanonicalHostname(String canonicalHostname) {
-                this.canonicalHostname = canonicalHostname;
+            public void setCanonical(Canonical canonical) {
+                this.canonical = canonical;
             }
 
-            public int getCanonicalPort() {
-                return canonicalPort;
-            }
+            public static class Canonical {
+                private String hostname;
+                private int port;
 
-            public void setCanonicalPort(int canonicalPort) {
-                this.canonicalPort = canonicalPort;
+                public String getHostname() {
+                    return hostname;
+                }
+
+                public void setHostname(String hostname) {
+                    this.hostname = hostname;
+                }
+
+                public int getPort() {
+                    return port;
+                }
+
+                public void setPort(int port) {
+                    this.port = port;
+                }
             }
         }
     }
 
     public static class Cluster {
+        private String name;
         private String[] seedNodes;
         private String downingProviderClass;
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
 
         public String[] getSeedNodes() {
             return seedNodes;

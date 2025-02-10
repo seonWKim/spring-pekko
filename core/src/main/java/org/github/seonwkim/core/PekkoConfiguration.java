@@ -1,5 +1,6 @@
 package org.github.seonwkim.core;
 
+import org.github.seonwkim.core.common.Nullable;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Configuration;
@@ -11,6 +12,8 @@ public class PekkoConfiguration {
 
     private Actor actor;
     private Remote remote;
+
+    @Nullable
     private Cluster cluster;
 
     public Actor getActor() {

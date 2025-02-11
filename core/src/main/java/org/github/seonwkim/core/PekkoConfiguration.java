@@ -103,10 +103,18 @@ public class PekkoConfiguration {
 
     @ConstructorBinding
     public static class Cluster {
+        private final String name;
         private final String[] seedNodes;
         private final String downingProviderClass;
 
-        public Cluster(String[] seedNodes, String downingProviderClass) {
+        public Cluster(String name, String[] seedNodes, String downingProviderClass) {
+            for (String seedNode : seedNodes) {
+                if (!seedNode.matches("pekko://" + name + "@.*")) {
+                    throw new IllegalArgumentException("Invalid seed node: " + seedNode + ". Expected format: pekko://" + name + "@<hostname>:<port>");
+                }
+            }
+
+            this.name = name;
             this.seedNodes = seedNodes;
             this.downingProviderClass = downingProviderClass;
         }

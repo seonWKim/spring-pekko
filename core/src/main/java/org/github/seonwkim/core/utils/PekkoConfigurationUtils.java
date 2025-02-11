@@ -1,34 +1,31 @@
 package org.github.seonwkim.core.utils;
 
 import java.lang.reflect.Method;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Properties;
-import java.util.stream.Collectors;
 
 import org.github.seonwkim.core.PekkoConfiguration;
 
 public class PekkoConfigurationUtils {
 
-    public static Properties toProperties(PekkoConfiguration config) {
+    public static String toPropertiesString(PekkoConfiguration config) {
         Map<String, Object> map = toMap(config);
-        Properties properties = new Properties();
+        StringBuilder propertiesString = new StringBuilder();
         for (Map.Entry<String, Object> entry : map.entrySet()) {
             final String key = entry.getKey();
             final Object value = entry.getValue();
             if (value instanceof String[]) {
                 final String[] listValues = (String[]) value;
-                for (int i = 0; i < listValues.length; i++) {
-                    properties.setProperty(key + '[' + i + ']', listValues[i]);
+                propertiesString.append(key).append(" = [\n");
+                for (String listValue : listValues) {
+                    propertiesString.append("    \"").append(listValue).append("\",\n");
                 }
+                propertiesString.append("]\n");
             } else {
-                // String
-                properties.setProperty(key, (String) value);
+                propertiesString.append(key).append(" = \"").append(value).append("\"\n");
             }
         }
-
-        return properties;
+        return propertiesString.toString();
     }
 
     private static Map<String, Object> toMap(PekkoConfiguration config) {

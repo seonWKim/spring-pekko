@@ -9,9 +9,11 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestPropertySource;
 
 @SpringBootApplication
+@DirtiesContext
 public class PekkoConfigurationTest {
 
     @Nested
@@ -21,7 +23,7 @@ public class PekkoConfigurationTest {
             "pekko.actor.allow-java-serialization=on",
             "pekko.actor.warn-about-java-serializer-usage=off",
             "pekko.remote.artery.canonical.hostname=127.0.0.1",
-            "pekko.remote.artery.canonical.port=2551"
+            "pekko.remote.artery.canonical.port=62551"
     }, locations = "")
     class TestNullableClusterConfiguration {
 
@@ -35,7 +37,7 @@ public class PekkoConfigurationTest {
             assertThat(pekkoConfiguration.getActor().getAllowJavaSerialization()).isEqualTo("on");
             assertThat(pekkoConfiguration.getActor().getWarnAboutJavaSerializerUsage()).isEqualTo("off");
             assertThat(pekkoConfiguration.getRemote().getArtery().getCanonical().getHostname()).isEqualTo("127.0.0.1");
-            assertThat(pekkoConfiguration.getRemote().getArtery().getCanonical().getPort()).isEqualTo(2551);
+            assertThat(pekkoConfiguration.getRemote().getArtery().getCanonical().getPort()).isEqualTo(62551);
             assertThat(pekkoConfiguration.getCluster()).isNull();
         }
     }
@@ -47,8 +49,9 @@ public class PekkoConfigurationTest {
             "pekko.actor.allow-java-serialization=on",
             "pekko.actor.warn-about-java-serializer-usage=off",
             "pekko.remote.artery.canonical.hostname=127.0.0.1",
-            "pekko.remote.artery.canonical.port=2551",
-            "pekko.cluster.seed-nodes=pekko://clusterName@127.0.0.1:2551,pekko://clusterName@127.0.0.1:2552,pekko://clusterName@127.0.0.1:2553",
+            "pekko.remote.artery.canonical.port=62552",
+            "pekko.cluster.name=clusterName",
+            "pekko.cluster.seed-nodes=pekko://clusterName@127.0.0.1:62552,pekko://clusterName@127.0.0.1:62553,pekko://clusterName@127.0.0.1:62554",
             "pekko.cluster.downing-provider-class=org.apache.pekko.cluster.sbr.SplitBrainResolverProvider"
     }, locations = "")
     class TestPekkoConfiguration {
@@ -63,21 +66,13 @@ public class PekkoConfigurationTest {
             assertThat(pekkoConfiguration.getActor().getAllowJavaSerialization()).isEqualTo("on");
             assertThat(pekkoConfiguration.getActor().getWarnAboutJavaSerializerUsage()).isEqualTo("off");
             assertThat(pekkoConfiguration.getRemote().getArtery().getCanonical().getHostname()).isEqualTo("127.0.0.1");
-            assertThat(pekkoConfiguration.getRemote().getArtery().getCanonical().getPort()).isEqualTo(2551);
+            assertThat(pekkoConfiguration.getRemote().getArtery().getCanonical().getPort()).isEqualTo(62552);
             assertThat(pekkoConfiguration.getCluster().getSeedNodes()).containsExactly(
-                    "pekko://clusterName@127.0.0.1:2551",
-                    "pekko://clusterName@127.0.0.1:2552",
-                    "pekko://clusterName@127.0.0.1:2553"
+                    "pekko://clusterName@127.0.0.1:62552",
+                    "pekko://clusterName@127.0.0.1:62553",
+                    "pekko://clusterName@127.0.0.1:62554"
             );
             assertThat(pekkoConfiguration.getCluster().getDowningProviderClass()).isEqualTo("org.apache.pekko.cluster.sbr.SplitBrainResolverProvider");
-        }
-
-        @Autowired
-        private ActorSystem<?> actorSystem;
-
-        @Test
-        public void testActorSystem() {
-            assertThat(actorSystem);
         }
     }
 }

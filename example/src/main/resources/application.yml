@@ -23,3 +23,7 @@ pekko:
       - pekko://spring-pekko-example-cluster@127.0.0.1:2552
       - pekko://spring-pekko-example-cluster@127.0.0.1:2553
     downing-provider-class: org.apache.pekko.cluster.sbr.SplitBrainResolverProvider
+
+logging:
+  level:
+    org.apache.pekko: DEBUG

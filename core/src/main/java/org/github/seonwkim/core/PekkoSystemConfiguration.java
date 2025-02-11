@@ -3,8 +3,8 @@ package org.github.seonwkim.core;
 import java.util.List;
 
 import org.apache.pekko.actor.typed.ActorSystem;
-import org.apache.pekko.actor.typed.javadsl.Behaviors;
 import org.github.seonwkim.core.behaviors.ClusterRootBehavior;
+import org.github.seonwkim.core.behaviors.NonClusterRootBehavior;
 import org.github.seonwkim.core.behaviors.SingletonBehavior;
 import org.github.seonwkim.core.utils.PekkoConfigurationUtils;
 import org.springframework.context.annotation.Bean;
@@ -30,7 +30,7 @@ public class PekkoSystemConfiguration {
             );
         } else {
             return ActorSystem.create(
-                    Behaviors.empty(),
+                    NonClusterRootBehavior.create(singletonBehaviors),
                     pekkoConfig.getName(),
                     config
             );

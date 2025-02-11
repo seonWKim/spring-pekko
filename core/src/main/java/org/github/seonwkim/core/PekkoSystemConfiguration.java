@@ -16,28 +16,22 @@ import com.typesafe.config.ConfigFactory;
 @Configuration
 public class PekkoSystemConfiguration {
 
-    private final List<SingletonBehavior<?>> singletonBehaviors;
-
-    public PekkoSystemConfiguration(List<SingletonBehavior<?>> singletonBehaviors) {
-        this.singletonBehaviors = singletonBehaviors;
-    }
-
     @Bean
-    public ActorSystem<?> actorSystem(PekkoConfiguration pekkoConfig) {
+    public ActorSystem<?> actorSystem(
+            List<SingletonBehavior<?>> singletonBehaviors,
+            PekkoConfiguration pekkoConfig) {
         final boolean configureCluster = pekkoConfig.getCluster() != null;
         final Config config = ConfigFactory.parseString(PekkoConfigurationUtils.toPropertiesString(pekkoConfig));
         if (configureCluster) {
             return ActorSystem.create(
                     ClusterRootBehavior.create(singletonBehaviors),
-                    // TODO: Do we have to allow users to configure their actor system name?
-                    "cluster-actor-system",
+                    pekkoConfig.getCluster().getName(),
                     config
             );
         } else {
             return ActorSystem.create(
                     Behaviors.empty(),
-                    // TODO: Do we have to allow users to configure their actor system name?
-                    "non-cluster-actor-system",
+                    pekkoConfig.getName(),
                     config
             );
         }

@@ -9,6 +9,7 @@ public class PekkoConfigurationUtilsTest {
 
     @Test
     public void testToPropertiesString() {
+        String name = "pekko-actor";
         PekkoConfiguration.Actor actor = new PekkoConfiguration.Actor("cluster", "on", "off");
         PekkoConfiguration.Remote.Artery.Canonical canonical = new PekkoConfiguration.Remote.Artery.Canonical("127.0.0.1", 2551);
         PekkoConfiguration.Remote.Artery artery = new PekkoConfiguration.Remote.Artery(canonical);
@@ -23,7 +24,7 @@ public class PekkoConfigurationUtilsTest {
                 "org.apache.pekko.cluster.sbr.SplitBrainResolverProvider"
         );
 
-        PekkoConfiguration pekkoConfiguration = new PekkoConfiguration(actor, remote, cluster);
+        PekkoConfiguration pekkoConfiguration = new PekkoConfiguration(name, actor, remote, cluster);
 
         String propertiesString = PekkoConfigurationUtils.toPropertiesString(pekkoConfiguration);
 

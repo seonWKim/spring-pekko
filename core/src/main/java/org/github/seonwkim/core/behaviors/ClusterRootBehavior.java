@@ -14,6 +14,7 @@ public class ClusterRootBehavior {
             context.getLog().info("Cluster node started at {}", cluster.selfMember().address());
 
             singletonBehaviors.forEach(behavior -> {
+                // TODO: register those beans
                 context.spawn(behavior.create(), behavior.name());
             });
             setUpShardedActors(context.getSystem());

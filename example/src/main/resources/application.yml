@@ -6,6 +6,7 @@ server:
   port: 8080
 
 pekko:
+  name: spring-pekko-example
   actor:
     provider: cluster
     allow-java-serialization: on
@@ -16,8 +17,9 @@ pekko:
         hostname: 127.0.0.1
         port: 2551
   cluster:
+    name: spring-pekko-example-cluster
     seed-nodes:
-      - pekko://clusterName@127.0.0.1:2551
-      - pekko://clusterName@127.0.0.1:2552
-      - pekko://clusterName@127.0.0.1:2553
+      - pekko://spring-pekko-example-cluster@127.0.0.1:2551
+      - pekko://spring-pekko-example-cluster@127.0.0.1:2552
+      - pekko://spring-pekko-example-cluster@127.0.0.1:2553
     downing-provider-class: org.apache.pekko.cluster.sbr.SplitBrainResolverProvider

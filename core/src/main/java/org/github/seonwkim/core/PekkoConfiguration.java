@@ -8,15 +8,21 @@ import org.springframework.boot.context.properties.ConstructorBinding;
 @ConfigurationProperties(prefix = "pekko")
 public class PekkoConfiguration {
 
+    private final String name;
     private final Actor actor;
     private final Remote remote;
     @Nullable
     private final Cluster cluster;
 
-    public PekkoConfiguration(Actor actor, Remote remote, Cluster cluster) {
+    public PekkoConfiguration(String name, Actor actor, Remote remote, Cluster cluster) {
+        this.name = name;
         this.actor = actor;
         this.remote = remote;
         this.cluster = cluster;
+    }
+
+    public String getName() {
+        return name;
     }
 
     public Actor getActor() {
@@ -117,6 +123,10 @@ public class PekkoConfiguration {
             this.name = name;
             this.seedNodes = seedNodes;
             this.downingProviderClass = downingProviderClass;
+        }
+
+        public String getName() {
+            return name;
         }
 
         public String[] getSeedNodes() {

@@ -2,6 +2,9 @@ spring:
   application:
     name: spring-pekko
 
+server:
+  port: 8080
+
 pekko:
   actor:
     provider: cluster
@@ -13,7 +16,6 @@ pekko:
         hostname: 127.0.0.1
         port: 2551
   cluster:
-    name: cluster-actor-system
     seed-nodes:
       - pekko://clusterName@127.0.0.1:2551
       - pekko://clusterName@127.0.0.1:2552

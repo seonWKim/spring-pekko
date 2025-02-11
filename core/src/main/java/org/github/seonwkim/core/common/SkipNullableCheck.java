@@ -6,11 +6,12 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Annotation to mark nullable types.
+ * Marker annotation to skip nullable checks.
  *
- * <p>This annotation is used to indicate that a method, field, or parameter can be null. It helps
- * in identifying potential nullability issues and improving code quality.
+ * <p>This annotation is used to mark methods, fields, or parameters that should be excluded from
+ * nullable checks. It is typically applied to code that is still under development or requires
+ * special handling.
  */
 @Retention(RetentionPolicy.SOURCE)
 @Target({ElementType.METHOD, ElementType.FIELD, ElementType.PARAMETER})
-public @interface Nullable {}
+public @interface SkipNullableCheck {}

@@ -14,20 +14,20 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class PekkoSystemConfiguration {
 
-  @Bean
-  public ActorSystem<?> actorSystem(
-      List<SingletonBehavior<?>> singletonBehaviors, PekkoConfiguration pekkoConfig) {
-    final boolean configureCluster = pekkoConfig.getCluster() != null;
-    final Config config =
-        ConfigFactory.parseString(PekkoConfigurationUtils.toPropertiesString(pekkoConfig));
-    if (configureCluster) {
-      return ActorSystem.create(
-          ClusterRootBehavior.create(singletonBehaviors),
-          pekkoConfig.getCluster().getName(),
-          config);
-    } else {
-      return ActorSystem.create(
-          NonClusterRootBehavior.create(singletonBehaviors), pekkoConfig.getName(), config);
-    }
-  }
+	@Bean
+	public ActorSystem<?> actorSystem(
+			List<SingletonBehavior<?>> singletonBehaviors, PekkoConfiguration pekkoConfig) {
+		final boolean configureCluster = pekkoConfig.getCluster() != null;
+		final Config config =
+				ConfigFactory.parseString(PekkoConfigurationUtils.toPropertiesString(pekkoConfig));
+		if (configureCluster) {
+			return ActorSystem.create(
+					ClusterRootBehavior.create(singletonBehaviors),
+					pekkoConfig.getCluster().getName(),
+					config);
+		} else {
+			return ActorSystem.create(
+					NonClusterRootBehavior.create(singletonBehaviors), pekkoConfig.getName(), config);
+		}
+	}
 }

@@ -48,6 +48,6 @@ spotless {
 		targetExclude(layout.buildDirectory.dir("**/*.java").get().asFile)
 		removeUnusedImports()
 		googleJavaFormat("1.7") // or use eclipse().configFile("path/to/eclipse-format.xml")
-		indentWithSpaces(4)
+		indentWithTabs(2)
 	}
 }

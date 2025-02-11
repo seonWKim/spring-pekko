@@ -4,14 +4,26 @@ import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Arrays;
+import java.util.Properties;
 
 import org.github.seonwkim.core.PekkoConfiguration;
+import org.github.seonwkim.core.PekkoSystemConfiguration;
 
 public class PekkoConfigurationUtils {
 
-    public static Map<String, String> toMap(PekkoConfiguration pekkoConfiguration) {
+    public static Properties toProperties(PekkoConfiguration config) {
+        Map<String, String> map = toMap(config);
+        Properties properties = new Properties();
+        for (Map.Entry<String, String> entry : map.entrySet()) {
+            properties.setProperty(entry.getKey(), entry.getValue());
+        }
+
+        return properties;
+    }
+
+    private static Map<String, String> toMap(PekkoConfiguration config) {
         Map<String, String> propertiesMap = new HashMap<>();
-        populateMap(pekkoConfiguration, propertiesMap, "pekko");
+        populateMap(config, propertiesMap, "pekko");
         return propertiesMap;
     }
 

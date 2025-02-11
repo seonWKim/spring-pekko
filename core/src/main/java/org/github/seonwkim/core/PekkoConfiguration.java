@@ -2,146 +2,121 @@ package org.github.seonwkim.core;
 
 import org.github.seonwkim.core.common.Nullable;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.context.annotation.Configuration;
+import org.springframework.boot.context.properties.ConstructorBinding;
 
-@Configuration
-@ConditionalOnProperty(prefix = "spring.actors.pekko", name = "enabled", havingValue = "true")
+@ConstructorBinding
 @ConfigurationProperties(prefix = "pekko")
 public class PekkoConfiguration {
 
-    private Actor actor;
-    private Remote remote;
-
+    private final Actor actor;
+    private final Remote remote;
     @Nullable
-    private Cluster cluster;
+    private final Cluster cluster;
+
+    public PekkoConfiguration(Actor actor, Remote remote, Cluster cluster) {
+        this.actor = actor;
+        this.remote = remote;
+        this.cluster = cluster;
+    }
 
     public Actor getActor() {
         return actor;
-    }
-
-    public void setActor(Actor actor) {
-        this.actor = actor;
     }
 
     public Remote getRemote() {
         return remote;
     }
 
-    public void setRemote(Remote remote) {
-        this.remote = remote;
-    }
-
     public Cluster getCluster() {
         return cluster;
     }
 
-    public void setCluster(Cluster cluster) {
-        this.cluster = cluster;
-    }
-
+    @ConstructorBinding
     public static class Actor {
-        private String provider;
-        private String allowJavaSerialization;
-        private String warnAboutJavaSerializerUsage;
+        private final String provider;
+        private final String allowJavaSerialization;
+        private final String warnAboutJavaSerializerUsage;
+
+        public Actor(String provider, String allowJavaSerialization, String warnAboutJavaSerializerUsage) {
+            this.provider = provider;
+            this.allowJavaSerialization = allowJavaSerialization;
+            this.warnAboutJavaSerializerUsage = warnAboutJavaSerializerUsage;
+        }
 
         public String getProvider() {
             return provider;
-        }
-
-        public void setProvider(String provider) {
-            this.provider = provider;
         }
 
         public String getAllowJavaSerialization() {
             return allowJavaSerialization;
         }
 
-        public void setAllowJavaSerialization(String allowJavaSerialization) {
-            this.allowJavaSerialization = allowJavaSerialization;
-        }
-
         public String getWarnAboutJavaSerializerUsage() {
             return warnAboutJavaSerializerUsage;
         }
-
-        public void setWarnAboutJavaSerializerUsage(String warnAboutJavaSerializerUsage) {
-            this.warnAboutJavaSerializerUsage = warnAboutJavaSerializerUsage;
-        }
     }
 
+    @ConstructorBinding
     public static class Remote {
-        private Artery artery;
+        private final Artery artery;
+
+        public Remote(Artery artery) {
+            this.artery = artery;
+        }
 
         public Artery getArtery() {
             return artery;
         }
 
-        public void setArtery(Artery artery) {
-            this.artery = artery;
-        }
-
+        @ConstructorBinding
         public static class Artery {
-            private Canonical canonical;
+            private final Canonical canonical;
+
+            public Artery(Canonical canonical) {
+                this.canonical = canonical;
+            }
 
             public Canonical getCanonical() {
                 return canonical;
             }
 
-            public void setCanonical(Canonical canonical) {
-                this.canonical = canonical;
-            }
-
+            @ConstructorBinding
             public static class Canonical {
-                private String hostname;
-                private int port;
+                private final String hostname;
+                private final int port;
+
+                public Canonical(String hostname, int port) {
+                    this.hostname = hostname;
+                    this.port = port;
+                }
 
                 public String getHostname() {
                     return hostname;
                 }
 
-                public void setHostname(String hostname) {
-                    this.hostname = hostname;
-                }
-
                 public int getPort() {
                     return port;
-                }
-
-                public void setPort(int port) {
-                    this.port = port;
                 }
             }
         }
     }
 
+    @ConstructorBinding
     public static class Cluster {
-        private String name;
-        private String[] seedNodes;
-        private String downingProviderClass;
+        private final String[] seedNodes;
+        private final String downingProviderClass;
 
-        public String getName() {
-            return name;
-        }
-
-        public void setName(String name) {
-            this.name = name;
+        public Cluster(String[] seedNodes, String downingProviderClass) {
+            this.seedNodes = seedNodes;
+            this.downingProviderClass = downingProviderClass;
         }
 
         public String[] getSeedNodes() {
             return seedNodes;
         }
 
-        public void setSeedNodes(String[] seedNodes) {
-            this.seedNodes = seedNodes;
-        }
-
         public String getDowningProviderClass() {
             return downingProviderClass;
-        }
-
-        public void setDowningProviderClass(String downingProviderClass) {
-            this.downingProviderClass = downingProviderClass;
         }
     }
 }

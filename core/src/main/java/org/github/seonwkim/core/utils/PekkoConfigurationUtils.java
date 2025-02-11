@@ -1,33 +1,43 @@
 package org.github.seonwkim.core.utils;
 
 import java.lang.reflect.Method;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Arrays;
 import java.util.Properties;
+import java.util.stream.Collectors;
 
 import org.github.seonwkim.core.PekkoConfiguration;
-import org.github.seonwkim.core.PekkoSystemConfiguration;
 
 public class PekkoConfigurationUtils {
 
     public static Properties toProperties(PekkoConfiguration config) {
-        Map<String, String> map = toMap(config);
+        Map<String, Object> map = toMap(config);
         Properties properties = new Properties();
-        for (Map.Entry<String, String> entry : map.entrySet()) {
-            properties.setProperty(entry.getKey(), entry.getValue());
+        for (Map.Entry<String, Object> entry : map.entrySet()) {
+            final String key = entry.getKey();
+            final Object value = entry.getValue();
+            if (value instanceof String[]) {
+                final String[] listValues = (String[]) value;
+                for (int i = 0; i < listValues.length; i++) {
+                    properties.setProperty(key + '[' + i + ']', listValues[i]);
+                }
+            } else {
+                // String
+                properties.setProperty(key, (String) value);
+            }
         }
 
         return properties;
     }
 
-    private static Map<String, String> toMap(PekkoConfiguration config) {
-        Map<String, String> propertiesMap = new HashMap<>();
+    private static Map<String, Object> toMap(PekkoConfiguration config) {
+        Map<String, Object> propertiesMap = new HashMap<>();
         populateMap(config, propertiesMap, "pekko");
         return propertiesMap;
     }
 
-    private static void populateMap(Object obj, Map<String, String> map, String prefix) {
+    private static void populateMap(Object obj, Map<String, Object> map, String prefix) {
         if (obj == null) {
             return;
         }
@@ -41,14 +51,14 @@ public class PekkoConfigurationUtils {
                         String propertyName = prefix + "." + toKebabCase(method.getName().substring(3));
                         if (value instanceof String || value instanceof Number || value instanceof Boolean) {
                             map.put(propertyName, value.toString());
-                        } else if (value instanceof String[] || value instanceof Object[]) {
-                            map.put(propertyName, Arrays.toString((Object[]) value));
+                        } else if (value instanceof String[]) {
+                            map.put(propertyName, value);
                         } else {
                             populateMap(value, map, propertyName);
                         }
                     }
                 } catch (Exception e) {
-                    // Handle exception or log it
+                    //
                 }
             }
         }

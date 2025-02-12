@@ -10,10 +10,11 @@ public class PekkoConfiguration {
 
 	private final String name;
 	private final Actor actor;
-	private final Remote remote;
+	@Nullable private final Remote remote;
 	@Nullable private final Cluster cluster;
 
-	public PekkoConfiguration(String name, Actor actor, Remote remote, Cluster cluster) {
+	public PekkoConfiguration(
+			String name, Actor actor, @Nullable Remote remote, @Nullable Cluster cluster) {
 		this.name = name;
 		this.actor = actor;
 		this.remote = remote;
@@ -28,10 +29,12 @@ public class PekkoConfiguration {
 		return actor;
 	}
 
+	@Nullable
 	public Remote getRemote() {
 		return remote;
 	}
 
+	@Nullable
 	public Cluster getCluster() {
 		return cluster;
 	}
@@ -39,11 +42,13 @@ public class PekkoConfiguration {
 	@ConstructorBinding
 	public static class Actor {
 		private final String provider;
-		private final String allowJavaSerialization;
-		private final String warnAboutJavaSerializerUsage;
+		@Nullable private final String allowJavaSerialization;
+		@Nullable private final String warnAboutJavaSerializerUsage;
 
 		public Actor(
-				String provider, String allowJavaSerialization, String warnAboutJavaSerializerUsage) {
+				String provider,
+				@Nullable String allowJavaSerialization,
+				@Nullable String warnAboutJavaSerializerUsage) {
 			this.provider = provider;
 			this.allowJavaSerialization = allowJavaSerialization;
 			this.warnAboutJavaSerializerUsage = warnAboutJavaSerializerUsage;
@@ -53,10 +58,12 @@ public class PekkoConfiguration {
 			return provider;
 		}
 
+		@Nullable
 		public String getAllowJavaSerialization() {
 			return allowJavaSerialization;
 		}
 
+		@Nullable
 		public String getWarnAboutJavaSerializerUsage() {
 			return warnAboutJavaSerializerUsage;
 		}

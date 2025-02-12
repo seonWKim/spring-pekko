@@ -5,9 +5,7 @@ import org.apache.pekko.actor.typed.Behavior;
 import org.apache.pekko.actor.typed.javadsl.Behaviors;
 import org.apache.pekko.cluster.typed.Cluster;
 import org.github.seonwkim.core.DependencyContainer;
-import org.springframework.stereotype.Component;
 
-@Component
 public class DefaultClusterRootBehavior implements ClusterRootBehavior {
 	@Override
 	public Behavior<String> create(DependencyContainer container) {

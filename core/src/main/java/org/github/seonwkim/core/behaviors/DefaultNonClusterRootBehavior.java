@@ -3,9 +3,7 @@ package org.github.seonwkim.core.behaviors;
 import org.apache.pekko.actor.typed.Behavior;
 import org.apache.pekko.actor.typed.javadsl.Behaviors;
 import org.github.seonwkim.core.DependencyContainer;
-import org.springframework.stereotype.Component;
 
-@Component
 public class DefaultNonClusterRootBehavior implements NonClusterRootBehavior {
 	@Override
 	public Behavior<String> create(DependencyContainer container) {

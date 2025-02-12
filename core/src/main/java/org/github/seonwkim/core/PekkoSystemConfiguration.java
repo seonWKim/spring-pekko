@@ -3,7 +3,12 @@ package org.github.seonwkim.core;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 import org.apache.pekko.actor.typed.ActorSystem;
+import org.github.seonwkim.core.behaviors.ClusterRootBehavior;
+import org.github.seonwkim.core.behaviors.DefaultClusterRootBehavior;
+import org.github.seonwkim.core.behaviors.DefaultNonClusterRootBehavior;
+import org.github.seonwkim.core.behaviors.NonClusterRootBehavior;
 import org.github.seonwkim.core.utils.PekkoConfigurationUtils;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -24,5 +29,17 @@ public class PekkoSystemConfiguration {
 			return ActorSystem.create(
 					container.getNonClusterRootBehavior().create(container), pekkoConfig.getName(), config);
 		}
+	}
+
+	@Bean
+	@ConditionalOnMissingBean(ClusterRootBehavior.class)
+	public ClusterRootBehavior clusterRootBehavior() {
+		return new DefaultClusterRootBehavior();
+	}
+
+	@Bean
+	@ConditionalOnMissingBean(NonClusterRootBehavior.class)
+	public NonClusterRootBehavior nonClusterRootBehavior() {
+		return new DefaultNonClusterRootBehavior();
 	}
 }

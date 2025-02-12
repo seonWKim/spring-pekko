@@ -4,7 +4,7 @@ run_application() {
   local port=$1
   local pekko_port=$2
 
-  ./gradlew example:bootRun \
+  ./gradlew example:cluster:bootRun \
     --args="--server.port=${port} \
             --pekko.remote.artery.canonical.port=${pekko_port}" \
     -PmainClass=org.github.seonwkim.example.SpringPekkoApplication \

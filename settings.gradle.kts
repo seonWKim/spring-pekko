@@ -1,4 +1,7 @@
 rootProject.name = "spring-pekko"
 
 include("core")
-include("example")
+
+// examples
+include("example:simple")
+include("example:cluster")

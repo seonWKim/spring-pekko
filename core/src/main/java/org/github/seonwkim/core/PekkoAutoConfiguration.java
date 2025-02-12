@@ -8,5 +8,5 @@ import org.springframework.context.annotation.Import;
 @Configuration
 @Import(value = {PekkoSystemConfiguration.class})
 @EnableConfigurationProperties(value = {PekkoConfiguration.class})
-@ComponentScan(basePackages = "org.github.seonwkim.core.behaviors")
+@ComponentScan(basePackages = "org.github.seonwkim.core")
 public class PekkoAutoConfiguration {}

@@ -3,7 +3,7 @@ package org.github.seonwkim.example.behaviors;
 import org.apache.pekko.actor.typed.Behavior;
 import org.github.seonwkim.core.DependencyContainer;
 import org.github.seonwkim.core.behaviors.ClusterRootBehavior;
-import org.github.seonwkim.core.behaviors.DefaultClusterRootBehavior;
+import org.github.seonwkim.core.behaviors.impl.DefaultClusterRootBehavior;
 import org.springframework.stereotype.Component;
 
 @Component

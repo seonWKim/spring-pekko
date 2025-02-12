@@ -1,8 +1,9 @@
-package org.github.seonwkim.core.behaviors;
+package org.github.seonwkim.core.behaviors.impl;
 
 import org.apache.pekko.actor.typed.Behavior;
 import org.apache.pekko.actor.typed.javadsl.Behaviors;
 import org.github.seonwkim.core.DependencyContainer;
+import org.github.seonwkim.core.behaviors.NonClusterRootBehavior;
 
 public class DefaultNonClusterRootBehavior implements NonClusterRootBehavior {
 	@Override

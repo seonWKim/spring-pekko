@@ -25,7 +25,7 @@ public class PekkoSystemConfiguration {
                 ConfigFactory.parseString(PekkoConfigurationUtils.toPropertiesString(pekkoConfig));
         if (configureCluster) {
             return ActorSystem.create(
-                    container.getClusterRootBehavior().create(container),
+                    container.getClusterRootBehavior().create(),
                     pekkoConfig.getCluster().getName(),
                     config);
         } else {

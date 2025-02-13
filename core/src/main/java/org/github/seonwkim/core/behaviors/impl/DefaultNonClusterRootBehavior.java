@@ -26,7 +26,7 @@ public class DefaultNonClusterRootBehavior implements NonClusterRootBehavior {
 											}
 
 											@Override
-											public ActorRef get() {
+											public ActorRef unwrap() {
 												return actorRef;
 											}
 										};

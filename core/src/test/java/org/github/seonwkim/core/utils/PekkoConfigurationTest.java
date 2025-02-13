@@ -2,12 +2,16 @@ package org.github.seonwkim.core.utils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.util.List;
+
 import org.github.seonwkim.core.PekkoConfiguration;
+import org.github.seonwkim.core.behaviors.SingletonBehavior;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestPropertySource;
 
@@ -34,6 +38,16 @@ public class PekkoConfigurationTest {
 			assertThat(pekkoConfiguration.getActor().getProvider()).isEqualTo("local");
 			assertThat(pekkoConfiguration.getRemote()).isNull();
 			assertThat(pekkoConfiguration.getCluster()).isNull();
+		}
+
+		@Autowired private GenericApplicationContext applicationContext;
+		@Autowired private List<SingletonBehavior<?>> singletonBehaviors;
+
+		@Test
+		public void singletonShouldBeRegistered() {
+			for (SingletonBehavior<?> behavior : singletonBehaviors) {
+				assertThat(applicationContext.getBean(behavior.beanName())).isNotNull();
+			}
 		}
 	}
 

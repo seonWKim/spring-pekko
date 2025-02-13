@@ -7,3 +7,7 @@
   - [ ] Create sharded actors with ease
 - [ ] Production ready features 
   - [ ] Configure cluster dynamically at runtime 
+
+
+- register as bean 
+  - find that specific actor easily 

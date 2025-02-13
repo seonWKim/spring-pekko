@@ -13,8 +13,8 @@ import org.springframework.stereotype.Component;
 class ClusterListenerSingletonBehavior implements SingletonBehavior<MemberEvent> {
 
 	@Override
-	public String name() {
-		return "cluster-listener-singleton-behavior";
+	public String beanName() {
+		return "seonwkim-cluster-listener-singleton-behavior";
 	}
 
 	@Override

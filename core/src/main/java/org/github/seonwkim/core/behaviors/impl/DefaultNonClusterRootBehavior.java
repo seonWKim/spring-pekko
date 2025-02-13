@@ -1,7 +1,9 @@
 package org.github.seonwkim.core.behaviors.impl;
 
+import org.apache.pekko.actor.typed.ActorRef;
 import org.apache.pekko.actor.typed.Behavior;
 import org.apache.pekko.actor.typed.javadsl.Behaviors;
+import org.github.seonwkim.core.ActorRefWrapper;
 import org.github.seonwkim.core.DependencyContainer;
 import org.github.seonwkim.core.behaviors.NonClusterRootBehavior;
 
@@ -16,7 +18,19 @@ public class DefaultNonClusterRootBehavior implements NonClusterRootBehavior {
 							.getSingletonBehaviors()
 							.forEach(
 									behavior -> {
-										context.spawn(behavior.create(), behavior.name());
+										ActorRef<?> actorRef = context.spawn(behavior.create(), behavior.beanName());
+										ActorRefWrapper<?> wrapper = new ActorRefWrapper() {
+											@Override
+											public String beanName() {
+												return behavior.beanName();
+											}
+
+											@Override
+											public ActorRef get() {
+												return actorRef;
+											}
+										};
+										container.getApplicationContext().registerBean(behavior.beanName(), ActorRefWrapper.class, () -> wrapper);
 									});
 
 					return Behaviors.receiveMessage(

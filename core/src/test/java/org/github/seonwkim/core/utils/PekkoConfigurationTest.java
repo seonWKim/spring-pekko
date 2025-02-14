@@ -3,7 +3,7 @@ package org.github.seonwkim.core.utils;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.List;
-
+import org.github.seonwkim.core.ActorRefWrapper;
 import org.github.seonwkim.core.PekkoConfiguration;
 import org.github.seonwkim.core.behaviors.SingletonBehavior;
 import org.junit.jupiter.api.Nested;
@@ -40,14 +40,25 @@ public class PekkoConfigurationTest {
 			assertThat(pekkoConfiguration.getCluster()).isNull();
 		}
 
-		@Autowired private GenericApplicationContext applicationContext;
 		@Autowired private List<SingletonBehavior<?>> singletonBehaviors;
 
 		@Test
-		public void singletonShouldBeRegistered() {
-			for (SingletonBehavior<?> behavior : singletonBehaviors) {
-				assertThat(applicationContext.getBean(behavior.beanName())).isNotNull();
-			}
+		public void singletonBehaviorsShouldBeRegistered() {
+			boolean singletonBehaviorImplementationRegistered =
+					singletonBehaviors.stream()
+							.anyMatch(
+									behavior ->
+											behavior.beanName().equals(SingletonBehaviorImplementation.BEAN_NAME));
+			assertThat(singletonBehaviorImplementationRegistered).isTrue();
+		}
+
+		@Autowired private GenericApplicationContext context;
+
+		@Test
+		public void actorRefsShouldBeRegistered() {
+			final ActorRefWrapper actorRef =
+					context.getBean(SingletonBehaviorImplementation.BEAN_NAME, ActorRefWrapper.class);
+			assertThat(actorRef).isNotNull();
 		}
 	}
 

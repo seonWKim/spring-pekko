@@ -2,6 +2,7 @@ package org.github.seonwkim.core;
 
 import java.time.Duration;
 import java.util.concurrent.CompletionStage;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 import org.apache.pekko.actor.typed.ActorRef;
@@ -31,12 +32,12 @@ public class ActorService {
     }
 
     @SuppressWarnings("unchcked")
-    public <T> ActorRefWrapper<T> getActorRefWrapper(String  beanName, Class<?> clazz) {
-        return (ActorRefWrapper<T>) genericApplicationContext.getBean(beanName, clazz);
+    public <REQ> ActorRefWrapper<REQ> getActorRefWrapper(String  beanName, Class<?> clazz) {
+        return (ActorRefWrapper<REQ>) genericApplicationContext.getBean(beanName, clazz);
     }
 
-    public <T> CompletionStage<ActorRef<T>> createActor(Supplier<Behavior<T>> behaviorSupplier, Duration timeout) {
-        return AskPattern.<ActorCreationBehavior.Command, ChildCreated<T>>ask(
+    public <REQ> CompletionStage<ActorRef<REQ>> createActor(Supplier<Behavior<REQ>> behaviorSupplier, Duration timeout) {
+        return AskPattern.<ActorCreationBehavior.Command, ChildCreated<REQ>>ask(
                 actorCreationBehavior.unwrap(),
                 replyTo -> new CreateChild<>(behaviorSupplier, replyTo),
                 timeout,
@@ -44,14 +45,17 @@ public class ActorService {
         ).thenApply(ChildCreated::getChildRef);
     }
 
-    public <T> void tell(ActorRefWrapper<T> wrapper, T message) {
-        wrapper.unwrap().tell(message);
+    public <REQ> void tell(ActorRef<REQ> actorRef, REQ message) {
+        actorRef.tell(message);
     }
 
-    public <T, R> CompletionStage<R> ask(ActorRefWrapper<T> wrapper, T message, Duration timeout) {
-        ActorRef<T> actorRef = wrapper.unwrap();
-        // TODO: I'm not sure whether it's okay to use actorSystem's scheduler
-        return AskPattern.ask(actorRef, replyTo -> message, timeout, actorSystem.scheduler());
+    public <REQ, RES> CompletionStage<RES> ask(ActorRef<REQ> actorRef, Function<ActorRef<RES>, REQ> messageFactory, Duration timeout) {
+        return AskPattern.ask(
+                actorRef,
+                messageFactory::apply,
+                timeout,
+                actorSystem.scheduler()
+        );
     }
 
     @EventListener(ContextRefreshedEvent.class)

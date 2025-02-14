@@ -2,11 +2,15 @@ package org.github.seonwkim.core;
 
 import java.time.Duration;
 import java.util.concurrent.CompletionStage;
+import java.util.function.Supplier;
 
 import org.apache.pekko.actor.typed.ActorRef;
 import org.apache.pekko.actor.typed.ActorSystem;
+import org.apache.pekko.actor.typed.Behavior;
 import org.apache.pekko.actor.typed.javadsl.AskPattern;
 import org.github.seonwkim.core.behaviors.ActorCreationBehavior;
+import org.github.seonwkim.core.behaviors.ActorCreationBehavior.ChildCreated;
+import org.github.seonwkim.core.behaviors.ActorCreationBehavior.CreateChild;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.context.support.GenericApplicationContext;
@@ -19,7 +23,7 @@ public class ActorService {
     private final ActorSystem actorSystem;
 
     // lazily initialized
-    private ActorRefWrapper<ActorCreationBehavior> actorCreationBehavior;
+    private ActorRefWrapper<ActorCreationBehavior.Command> actorCreationBehavior;
 
     public ActorService(GenericApplicationContext genericApplicationContext, ActorSystem actorSystem) {
         this.genericApplicationContext = genericApplicationContext;
@@ -27,8 +31,17 @@ public class ActorService {
     }
 
     @SuppressWarnings("unchcked")
-    public <T> ActorRefWrapper<T> getActor(String  beanName, Class<?> clazz) {
+    public <T> ActorRefWrapper<T> getActorRefWrapper(String  beanName, Class<?> clazz) {
         return (ActorRefWrapper<T>) genericApplicationContext.getBean(beanName, clazz);
+    }
+
+    public <T> CompletionStage<ActorRef<T>> createActor(Supplier<Behavior<T>> behaviorSupplier, Duration timeout) {
+        return AskPattern.<ActorCreationBehavior.Command, ChildCreated<T>>ask(
+                actorCreationBehavior.unwrap(),
+                replyTo -> new CreateChild<>(behaviorSupplier, replyTo),
+                timeout,
+                actorSystem.scheduler()
+        ).thenApply(ChildCreated::getChildRef);
     }
 
     public <T> void tell(ActorRefWrapper<T> wrapper, T message) {
@@ -43,6 +56,6 @@ public class ActorService {
 
     @EventListener(ContextRefreshedEvent.class)
     public void initializeActorCreationBehavior() {
-        actorCreationBehavior = getActor(ActorCreationBehavior.BEAN_NAME, ActorRefWrapper.class);
+        actorCreationBehavior = getActorRefWrapper(ActorCreationBehavior.BEAN_NAME, ActorRefWrapper.class);
     }
 }

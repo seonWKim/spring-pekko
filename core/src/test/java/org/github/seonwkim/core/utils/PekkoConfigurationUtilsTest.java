@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Test;
 public class PekkoConfigurationUtilsTest {
 
 	@Test
-	public void testToPropertiesString() {
+	public void test_toPropertiesString() {
 		String name = "pekko-actor";
 		PekkoConfiguration.Actor actor = new PekkoConfiguration.Actor("cluster", "on", "off");
 		PekkoConfiguration.Remote.Artery.Canonical canonical =

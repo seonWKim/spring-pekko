@@ -32,7 +32,7 @@ public class PekkoConfigurationTest {
 		@Autowired private PekkoConfiguration pekkoConfiguration;
 
 		@Test
-		public void testNonClusterConfiguration() {
+		public void test_non_cluster_configuration() {
 			assertThat(pekkoConfiguration).isNotNull();
 			assertThat(pekkoConfiguration.getName()).isEqualTo("simple");
 			assertThat(pekkoConfiguration.getActor().getProvider()).isEqualTo("local");
@@ -43,7 +43,7 @@ public class PekkoConfigurationTest {
 		@Autowired private List<SingletonBehavior<?>> singletonBehaviors;
 
 		@Test
-		public void singletonBehaviorsShouldBeRegistered() {
+		public void singletonBehavior_should_be_registered() {
 			boolean singletonBehaviorImplementationRegistered =
 					singletonBehaviors.stream()
 							.anyMatch(
@@ -55,7 +55,7 @@ public class PekkoConfigurationTest {
 		@Autowired private GenericApplicationContext context;
 
 		@Test
-		public void actorRefsShouldBeRegistered() {
+		public void actorRefs_should_be_registered() {
 			final ActorRefWrapper actorRef =
 					context.getBean(SingletonBehaviorImplementation.BEAN_NAME, ActorRefWrapper.class);
 			assertThat(actorRef).isNotNull();
@@ -82,7 +82,7 @@ public class PekkoConfigurationTest {
 		@Autowired private PekkoConfiguration pekkoConfiguration;
 
 		@Test
-		public void testClusterPekkoConfiguration() {
+		public void test_cluster_pekko_configuration() {
 			assertThat(pekkoConfiguration).isNotNull();
 			assertThat(pekkoConfiguration.getActor().getProvider()).isEqualTo("cluster");
 			assertThat(pekkoConfiguration.getActor().getAllowJavaSerialization()).isEqualTo("on");

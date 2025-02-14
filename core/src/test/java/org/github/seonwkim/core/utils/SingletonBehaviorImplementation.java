@@ -1,6 +1,7 @@
 package org.github.seonwkim.core.utils;
 
 import org.apache.pekko.actor.typed.Behavior;
+import org.apache.pekko.actor.typed.javadsl.Behaviors;
 import org.github.seonwkim.core.behaviors.SingletonBehavior;
 import org.github.seonwkim.core.utils.SingletonBehaviorImplementation.Command;
 import org.springframework.stereotype.Component;
@@ -20,6 +21,6 @@ public class SingletonBehaviorImplementation implements SingletonBehavior<Comman
 
 	@Override
 	public Behavior<Command> create() {
-		return null;
+		return Behaviors.stopped();
 	}
 }

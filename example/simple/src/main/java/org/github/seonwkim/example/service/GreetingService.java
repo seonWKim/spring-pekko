@@ -13,7 +13,7 @@ public class GreetingService {
     public GreetingService(ActorService service) {this.service = service;}
 
     public void hello() {
-        ActorRefWrapper<ActorCreationBehavior> actorRefWrapper = service.getActor(
+        ActorRefWrapper<ActorCreationBehavior> actorRefWrapper = service.getActorRefWrapper(
                 ActorCreationBehavior.BEAN_NAME, ActorRefWrapper.class);
     }
 }

@@ -9,6 +9,9 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class ActorCreationBehavior implements SingletonBehavior<ActorCreationBehavior.Command> {
+
+	public static final String BEAN_NAME = "system-actor-creation-behavior";
+
 	public interface Command {}
 
 	// Message to request a child actor creation
@@ -45,7 +48,7 @@ public class ActorCreationBehavior implements SingletonBehavior<ActorCreationBeh
 
 	@Override
 	public String beanName() {
-		return "system-actor-creation-behavior";
+		return BEAN_NAME;
 	}
 
 	/** The behavior that listens for child actor creation requests. */

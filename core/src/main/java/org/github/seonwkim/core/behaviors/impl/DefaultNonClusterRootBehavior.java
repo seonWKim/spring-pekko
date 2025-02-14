@@ -19,18 +19,22 @@ public class DefaultNonClusterRootBehavior implements NonClusterRootBehavior {
 							.forEach(
 									behavior -> {
 										ActorRef<?> actorRef = context.spawn(behavior.create(), behavior.beanName());
-										ActorRefWrapper<?> wrapper = new ActorRefWrapper() {
-											@Override
-											public String beanName() {
-												return behavior.beanName();
-											}
 
-											@Override
-											public ActorRef unwrap() {
-												return actorRef;
-											}
-										};
-										container.getApplicationContext().registerBean(behavior.beanName(), ActorRefWrapper.class, () -> wrapper);
+										ActorRefWrapper<?> wrapper =
+												new ActorRefWrapper() {
+													@Override
+													public String beanName() {
+														return behavior.beanName();
+													}
+
+													@Override
+													public ActorRef unwrap() {
+														return actorRef;
+													}
+												};
+										container
+												.getApplicationContext()
+												.registerBean(behavior.beanName(), ActorRefWrapper.class, () -> wrapper);
 									});
 
 					return Behaviors.receiveMessage(

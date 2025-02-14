@@ -14,7 +14,7 @@ class ClusterListenerSingletonBehavior implements SingletonBehavior<MemberEvent>
 
 	@Override
 	public String beanName() {
-		return "seonwkim-cluster-listener-singleton-behavior";
+		return "system-cluster-listener-singleton-behavior";
 	}
 
 	@Override

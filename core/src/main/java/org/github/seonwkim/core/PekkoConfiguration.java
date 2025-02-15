@@ -39,6 +39,10 @@ public class PekkoConfiguration {
 		return cluster;
 	}
 
+	public boolean isClusterMode() {
+		return this.cluster != null;
+	}
+
 	@ConstructorBinding
 	public static class Actor {
 		private final String provider;

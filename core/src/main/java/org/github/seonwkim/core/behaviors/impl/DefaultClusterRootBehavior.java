@@ -41,7 +41,6 @@ public class DefaultClusterRootBehavior implements ClusterRootBehavior {
                                                               () -> wrapper);
 
                                     });
-                    container.getShardConfigurationBehavior().create(context.getSystem());
 
                     return Behaviors.receiveMessage(
                             message -> {

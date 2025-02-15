@@ -5,9 +5,9 @@ import org.apache.pekko.actor.typed.Behavior;
 import org.apache.pekko.actor.typed.javadsl.Behaviors;
 import org.github.seonwkim.core.ActorRefWrapper;
 import org.github.seonwkim.core.DependencyContainer;
-import org.github.seonwkim.core.behaviors.NonClusterRootBehavior;
+import org.github.seonwkim.core.behaviors.RootBehavior;
 
-public class DefaultNonClusterRootBehavior implements NonClusterRootBehavior {
+public class DefaultRootBehavior implements RootBehavior {
 	@Override
 	public Behavior<String> create(DependencyContainer container) {
 		return Behaviors.setup(

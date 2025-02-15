@@ -2,8 +2,7 @@ package org.github.seonwkim.core;
 
 import java.util.List;
 
-import org.github.seonwkim.core.behaviors.ClusterRootBehavior;
-import org.github.seonwkim.core.behaviors.NonClusterRootBehavior;
+import org.github.seonwkim.core.behaviors.RootBehavior;
 import org.github.seonwkim.core.behaviors.SingletonBehavior;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.stereotype.Component;
@@ -11,17 +10,14 @@ import org.springframework.stereotype.Component;
 @Component
 public class DependencyContainer {
 	private final GenericApplicationContext applicationContext;
-	private final ClusterRootBehavior clusterRootBehavior;
-	private final NonClusterRootBehavior nonClusterRootBehavior;
+	private final RootBehavior rootBehavior;
 	private final List<SingletonBehavior<?>> singletonBehaviors;
 	public DependencyContainer(
             GenericApplicationContext applicationContext,
-            ClusterRootBehavior clusterRootBehavior,
-            NonClusterRootBehavior nonClusterRootBehavior,
+            RootBehavior rootBehavior,
             List<SingletonBehavior<?>> singletonBehaviors) {
 		this.applicationContext = applicationContext;
-		this.clusterRootBehavior = clusterRootBehavior;
-		this.nonClusterRootBehavior = nonClusterRootBehavior;
+		this.rootBehavior = rootBehavior;
 		this.singletonBehaviors = singletonBehaviors;
     }
 
@@ -29,12 +25,8 @@ public class DependencyContainer {
 		return applicationContext;
 	}
 
-	public ClusterRootBehavior getClusterRootBehavior() {
-		return clusterRootBehavior;
-	}
-
-	public NonClusterRootBehavior getNonClusterRootBehavior() {
-		return nonClusterRootBehavior;
+	public RootBehavior getNonClusterRootBehavior() {
+		return rootBehavior;
 	}
 
 	public List<SingletonBehavior<?>> getSingletonBehaviors() {

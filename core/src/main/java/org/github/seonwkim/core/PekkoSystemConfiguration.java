@@ -5,11 +5,9 @@ import java.util.List;
 import org.apache.pekko.actor.typed.ActorSystem;
 import org.apache.pekko.cluster.sharding.typed.javadsl.ClusterSharding;
 import org.apache.pekko.cluster.sharding.typed.javadsl.Entity;
-import org.github.seonwkim.core.behaviors.ClusterRootBehavior;
-import org.github.seonwkim.core.behaviors.NonClusterRootBehavior;
+import org.github.seonwkim.core.behaviors.RootBehavior;
 import org.github.seonwkim.core.behaviors.ShardBehavior;
-import org.github.seonwkim.core.behaviors.impl.DefaultClusterRootBehavior;
-import org.github.seonwkim.core.behaviors.impl.DefaultNonClusterRootBehavior;
+import org.github.seonwkim.core.behaviors.impl.DefaultRootBehavior;
 import org.github.seonwkim.core.utils.PekkoConfigurationUtils;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
@@ -25,27 +23,14 @@ public class PekkoSystemConfiguration {
     public ActorSystem<?> actorSystem(DependencyContainer container, PekkoConfiguration pekkoConfig) {
         final Config config =
                 ConfigFactory.parseString(PekkoConfigurationUtils.toPropertiesString(pekkoConfig));
-        if (pekkoConfig.isClusterMode()) {
-            return ActorSystem.create(
-                    container.getClusterRootBehavior().create(container),
-                    pekkoConfig.getCluster().getName(),
-                    config);
-        } else {
-            return ActorSystem.create(
-                    container.getNonClusterRootBehavior().create(container), pekkoConfig.getName(), config);
-        }
+        final String name = pekkoConfig.isClusterMode() ? pekkoConfig.getCluster().getName() : pekkoConfig.getName();
+        return ActorSystem.create(container.getNonClusterRootBehavior().create(container), name, config);
     }
 
     @Bean
-    @ConditionalOnMissingBean(ClusterRootBehavior.class)
-    public ClusterRootBehavior clusterRootBehavior() {
-        return new DefaultClusterRootBehavior();
-    }
-
-    @Bean
-    @ConditionalOnMissingBean(NonClusterRootBehavior.class)
-    public NonClusterRootBehavior nonClusterRootBehavior() {
-        return new DefaultNonClusterRootBehavior();
+    @ConditionalOnMissingBean(RootBehavior.class)
+    public RootBehavior nonClusterRootBehavior() {
+        return new DefaultRootBehavior();
     }
 
     @Bean

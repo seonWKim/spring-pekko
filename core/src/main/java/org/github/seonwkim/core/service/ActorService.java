@@ -34,15 +34,15 @@ public class ActorService {
     }
 
     @SuppressWarnings("unchcked")
-    public <REQ> ActorRefWrapper<REQ> getActorRefWrapper(String  beanName, Class<?> clazz) {
-        return (ActorRefWrapper<REQ>) genericApplicationContext.getBean(beanName, clazz);
+    public <T> ActorRefWrapper<T> getActorRefWrapper(String  beanName, Class<?> clazz) {
+        return (ActorRefWrapper<T>) genericApplicationContext.getBean(beanName, clazz);
     }
 
-    public <REQ> CompletionStage<ActorRef<REQ>> createLocalActor(
+    public <T> CompletionStage<ActorRef<T>> createLocalActor(
             String childName,
-            Supplier<Behavior<REQ>> behaviorSupplier,
+            Supplier<Behavior<T>> behaviorSupplier,
             Duration timeout) {
-        return AskPattern.<ActorCreationBehavior.Command, ChildCreated<REQ>>ask(
+        return AskPattern.<ActorCreationBehavior.Command, ChildCreated<T>>ask(
                 actorCreationBehavior.unwrap(),
                 replyTo -> new CreateChild<>(childName, behaviorSupplier, replyTo),
                 timeout,
@@ -50,11 +50,11 @@ public class ActorService {
         ).thenApply(ChildCreated::getChildRef);
     }
 
-    public <REQ> void tell(ActorRef<REQ> actorRef, REQ message) {
+    public <T> void tell(ActorRef<T> actorRef, T message) {
         actorRef.tell(message);
     }
 
-    public <REQ, RES> CompletionStage<RES> ask(ActorRef<REQ> actorRef, Function<ActorRef<RES>, REQ> messageFactory, Duration timeout) {
+    public <T, Q> CompletionStage<Q> ask(ActorRef<T> actorRef, Function<ActorRef<Q>, T> messageFactory, Duration timeout) {
         return AskPattern.ask(
                 actorRef,
                 messageFactory::apply,

@@ -1,4 +1,4 @@
-package org.github.seonwkim.core;
+package org.github.seonwkim.core.service;
 
 import java.time.Duration;
 import java.util.concurrent.CompletionStage;
@@ -9,8 +9,10 @@ import org.apache.pekko.actor.typed.ActorRef;
 import org.apache.pekko.actor.typed.ActorSystem;
 import org.apache.pekko.actor.typed.Behavior;
 import org.apache.pekko.actor.typed.javadsl.AskPattern;
+import org.github.seonwkim.core.ActorRefWrapper;
 import org.github.seonwkim.core.behaviors.ActorCreationBehavior;
 import org.github.seonwkim.core.behaviors.ActorCreationBehavior.ChildCreated;
+import org.github.seonwkim.core.behaviors.ActorCreationBehavior.Command;
 import org.github.seonwkim.core.behaviors.ActorCreationBehavior.CreateChild;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
@@ -24,7 +26,7 @@ public class ActorService {
     private final ActorSystem actorSystem;
 
     // lazily initialized
-    private ActorRefWrapper<ActorCreationBehavior.Command> actorCreationBehavior;
+    private ActorRefWrapper<Command> actorCreationBehavior;
 
     public ActorService(GenericApplicationContext genericApplicationContext, ActorSystem actorSystem) {
         this.genericApplicationContext = genericApplicationContext;

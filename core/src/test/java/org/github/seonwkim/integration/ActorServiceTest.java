@@ -1,4 +1,4 @@
-package org.github.seonwkim.core;
+package org.github.seonwkim.integration;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -10,24 +10,23 @@ import java.util.concurrent.CompletableFuture;
 import org.apache.pekko.actor.typed.ActorRef;
 import org.apache.pekko.actor.typed.Behavior;
 import org.apache.pekko.actor.typed.javadsl.Behaviors;
-import org.github.seonwkim.core.SimpleActorBehavior.AskMessageCommand;
-import org.github.seonwkim.core.SimpleActorBehavior.StopCommand;
+import org.github.seonwkim.core.service.ActorService;
+import org.github.seonwkim.integration.SimpleActorBehavior.AskMessageCommand;
+import org.github.seonwkim.integration.SimpleActorBehavior.StopCommand;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.TestPropertySource;
 
-@SpringBootApplication
-@SpringBootTest
 @TestPropertySource(
         properties = {
                 "pekko.name=simple",
                 "pekko.actor.provider=local",
         },
         locations = "")
+@SpringBootTest
 class ActorServiceTest {
 
     @Autowired

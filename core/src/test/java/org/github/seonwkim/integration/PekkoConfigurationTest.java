@@ -1,11 +1,13 @@
-package org.github.seonwkim.core.utils;
+package org.github.seonwkim.integration;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.List;
+
 import org.github.seonwkim.core.ActorRefWrapper;
 import org.github.seonwkim.core.PekkoConfiguration;
 import org.github.seonwkim.core.behaviors.SingletonBehavior;
+import org.github.seonwkim.core.utils.SingletonBehaviorImplementation;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,18 +17,17 @@ import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestPropertySource;
 
-@SpringBootApplication
-@DirtiesContext
 public class PekkoConfigurationTest {
 
 	@Nested
-	@SpringBootTest
 	@TestPropertySource(
 			properties = {
 				"pekko.name=simple",
 				"pekko.actor.provider=local",
 			},
 			locations = "")
+	@DirtiesContext
+	@SpringBootTest
 	class TestNullableClusterConfiguration {
 
 		@Autowired private PekkoConfiguration pekkoConfiguration;
@@ -63,7 +64,6 @@ public class PekkoConfigurationTest {
 	}
 
 	@Nested
-	@SpringBootTest
 	@TestPropertySource(
 			properties = {
 				"pekko.name=cluster",
@@ -77,6 +77,8 @@ public class PekkoConfigurationTest {
 				"pekko.cluster.downing-provider-class=org.apache.pekko.cluster.sbr.SplitBrainResolverProvider"
 			},
 			locations = "")
+	@DirtiesContext
+	@SpringBootTest
 	class TestPekkoConfiguration {
 
 		@Autowired private PekkoConfiguration pekkoConfiguration;

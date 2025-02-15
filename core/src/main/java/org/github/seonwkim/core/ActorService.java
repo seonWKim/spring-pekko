@@ -36,10 +36,13 @@ public class ActorService {
         return (ActorRefWrapper<REQ>) genericApplicationContext.getBean(beanName, clazz);
     }
 
-    public <REQ> CompletionStage<ActorRef<REQ>> createActor(Supplier<Behavior<REQ>> behaviorSupplier, Duration timeout) {
+    public <REQ> CompletionStage<ActorRef<REQ>> createActor(
+            String childName,
+            Supplier<Behavior<REQ>> behaviorSupplier,
+            Duration timeout) {
         return AskPattern.<ActorCreationBehavior.Command, ChildCreated<REQ>>ask(
                 actorCreationBehavior.unwrap(),
-                replyTo -> new CreateChild<>(behaviorSupplier, replyTo),
+                replyTo -> new CreateChild<>(childName, behaviorSupplier, replyTo),
                 timeout,
                 actorSystem.scheduler()
         ).thenApply(ChildCreated::getChildRef);

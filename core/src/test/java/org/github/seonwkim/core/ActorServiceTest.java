@@ -1,16 +1,20 @@
 package org.github.seonwkim.core;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.time.Duration;
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
-import java.util.concurrent.ExecutionException;
 
 import org.apache.pekko.actor.typed.ActorRef;
 import org.apache.pekko.actor.typed.Behavior;
 import org.apache.pekko.actor.typed.javadsl.Behaviors;
 import org.github.seonwkim.core.SimpleActorBehavior.AskMessageCommand;
+import org.github.seonwkim.core.SimpleActorBehavior.StopCommand;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -30,37 +34,38 @@ class ActorServiceTest {
     @Autowired
     private ActorService actorService;
 
-    @Test
-    void test_createActor() throws InterruptedException, ExecutionException {
-        CompletionStage<ActorRef<SimpleActorBehavior.Command>> actor = actorService.createActor(
-                SimpleActorBehavior::create, Duration.ofSeconds(5));
-        ActorRef<SimpleActorBehavior.Command> actorRef = actor.toCompletableFuture().get();
-        assertThat(actorRef).isNotNull();
+    ActorRef<SimpleActorBehavior.Command> actorRef;
+
+    @BeforeEach
+    void setUp() throws Exception {
+        actorRef = actorService.createActor("child-actor-" + UUID.randomUUID(), SimpleActorBehavior::create, Duration.ofSeconds(1)).toCompletableFuture().get();
+    }
+
+    @AfterEach
+    void tearDown() {
+        actorService.tell(actorRef, new StopCommand());
     }
 
     @Test
-    void test_tell() throws InterruptedException, ExecutionException {
-        CompletionStage<ActorRef<SimpleActorBehavior.Command>> actor = actorService.createActor(
-                SimpleActorBehavior::create, Duration.ofSeconds(5));
-        ActorRef<SimpleActorBehavior.Command> actorRef = actor.toCompletableFuture().get();
-        assertThat(actorRef).isNotNull();
-
-        SimpleActorBehavior.PrintMessageCommand message = new SimpleActorBehavior.PrintMessageCommand(
-                "Hello, World!");
+    void test_tell() throws Exception {
+        SimpleActorBehavior.PrintMessageCommand message = new SimpleActorBehavior.PrintMessageCommand("Hello, World!");
         actorService.tell(actorRef, message);
         Thread.sleep(500); // wait for message to be sent
         assertThat(SimpleActorBehavior.counterForTest).isEqualTo(1);
     }
 
     @Test
-    void test_ask() throws InterruptedException, ExecutionException {
-        // Create an actor
-        CompletionStage<ActorRef<SimpleActorBehavior.Command>> actor = actorService.createActor(
-                SimpleActorBehavior::create, Duration.ofSeconds(5));
-        ActorRef<SimpleActorBehavior.Command> actorRef = actor.toCompletableFuture().get();
-        assertThat(actorRef).isNotNull();
+    void actors_with_same_path_should_not_be_created() throws Exception {
+        final String childName = "same-child-actor-name";
+        actorService.createActor(childName, SimpleActorBehavior::create, Duration.ofSeconds(1))
+                    .toCompletableFuture().get();
+        assertThrows(Exception.class,
+                     () -> actorService.createActor(childName, SimpleActorBehavior::create,
+                                                    Duration.ofSeconds(1)).toCompletableFuture().get());
+    }
 
-        // Call the ask method
+    @Test
+    void test_ask() throws Exception {
         CompletableFuture<String> result = actorService.<SimpleActorBehavior.Command, String>ask(
                 actorRef,
                 replyTo -> new AskMessageCommand<>("Hello, World!", replyTo),
@@ -85,7 +90,7 @@ class SimpleActorBehavior {
         }
     }
 
-    public static class AskMessageCommand<T> implements Command{
+    public static class AskMessageCommand<T> implements Command {
         public final String message;
         public final ActorRef<T> replyTo;
 
@@ -94,6 +99,8 @@ class SimpleActorBehavior {
             this.replyTo = replyTo;
         }
     }
+
+    public static class StopCommand implements Command {}
 
     public static String beanName() {
         return "system-simple-actor-behavior";
@@ -107,6 +114,7 @@ class SimpleActorBehavior {
                                             SimpleActorBehavior::handlePrintMessageCommand)
                                  .onMessage(AskMessageCommand.class,
                                             SimpleActorBehavior::handleAskMessageCommand)
+                                 .onMessage(StopCommand.class, command -> Behaviors.stopped())
                                  .build());
     }
 

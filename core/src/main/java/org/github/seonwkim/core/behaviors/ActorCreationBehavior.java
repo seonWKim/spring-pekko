@@ -19,12 +19,18 @@ public class ActorCreationBehavior implements SingletonBehavior<ActorCreationBeh
 
     // Message to request a child actor creation
     public static class CreateChild<T> implements Command {
+        private final String childName;
         private final Supplier<Behavior<T>> behaviorSupplier;
         private final ActorRef<ChildCreated<T>> replyTo;
 
-        public CreateChild(Supplier<Behavior<T>> behaviorSupplier, ActorRef<ChildCreated<T>> replyTo) {
+        public CreateChild(String childName, Supplier<Behavior<T>> behaviorSupplier, ActorRef<ChildCreated<T>> replyTo) {
+            this.childName = childName;
             this.behaviorSupplier = behaviorSupplier;
             this.replyTo = replyTo;
+        }
+
+        public String getChildName() {
+            return childName;
         }
 
         public Supplier<Behavior<T>> getBehaviorSupplier() {
@@ -75,10 +81,7 @@ public class ActorCreationBehavior implements SingletonBehavior<ActorCreationBeh
                                          CreateChild.class,
                                          cmd -> {
                                              CreateChild<?> message = (CreateChild<?>) cmd;
-                                             String childName = "child-" + UUID.randomUUID();
-                                             ActorRef<?> childRef =
-                                                     context.spawn(message.getBehaviorSupplier().get(),
-                                                                   childName);
+                                             ActorRef<?> childRef = context.spawn(message.getBehaviorSupplier().get(), message.getChildName());
                                              ChildCreated childCreated = new ChildCreated(childRef);
                                              message.getReplyTo().tell(childCreated);
                                              return Behaviors.same();

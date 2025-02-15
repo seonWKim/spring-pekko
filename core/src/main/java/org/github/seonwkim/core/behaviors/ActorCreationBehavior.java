@@ -1,6 +1,5 @@
 package org.github.seonwkim.core.behaviors;
 
-import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 

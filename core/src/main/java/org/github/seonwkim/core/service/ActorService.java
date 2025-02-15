@@ -38,7 +38,7 @@ public class ActorService {
         return (ActorRefWrapper<REQ>) genericApplicationContext.getBean(beanName, clazz);
     }
 
-    public <REQ> CompletionStage<ActorRef<REQ>> createActor(
+    public <REQ> CompletionStage<ActorRef<REQ>> createLocalActor(
             String childName,
             Supplier<Behavior<REQ>> behaviorSupplier,
             Duration timeout) {

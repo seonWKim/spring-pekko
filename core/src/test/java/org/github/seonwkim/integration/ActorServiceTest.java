@@ -39,7 +39,7 @@ class ActorServiceTest {
     @BeforeEach
     void setUp() throws Exception {
         behavior = new SimpleActorBehavior();
-        actorRef = actorService.createActor("child-actor-" + UUID.randomUUID(), behavior::create, Duration.ofSeconds(1)).toCompletableFuture().get();
+        actorRef = actorService.createLocalActor("child-actor-" + UUID.randomUUID(), behavior::create, Duration.ofSeconds(1)).toCompletableFuture().get();
     }
 
     @AfterEach
@@ -59,9 +59,9 @@ class ActorServiceTest {
     @Test
     void actors_with_same_path_should_not_be_created() throws Exception {
         final String childName = "same-child-actor-name";
-        actorService.createActor(childName, new SimpleActorBehavior()::create, Duration.ofSeconds(1))
+        actorService.createLocalActor(childName, new SimpleActorBehavior()::create, Duration.ofSeconds(1))
                     .toCompletableFuture().get();
-        assertThrows(Exception.class, () -> actorService.createActor(childName, new SimpleActorBehavior()::create, Duration.ofSeconds(1)).toCompletableFuture().get());
+        assertThrows(Exception.class, () -> actorService.createLocalActor(childName, new SimpleActorBehavior()::create, Duration.ofSeconds(1)).toCompletableFuture().get());
     }
 
     @Test

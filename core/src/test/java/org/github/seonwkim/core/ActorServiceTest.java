@@ -6,7 +6,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import java.time.Duration;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionStage;
 
 import org.apache.pekko.actor.typed.ActorRef;
 import org.apache.pekko.actor.typed.Behavior;
@@ -38,7 +37,8 @@ class ActorServiceTest {
 
     @BeforeEach
     void setUp() throws Exception {
-        actorRef = actorService.createActor("child-actor-" + UUID.randomUUID(), SimpleActorBehavior::create, Duration.ofSeconds(1)).toCompletableFuture().get();
+        actorRef = actorService.createActor("child-actor-" + UUID.randomUUID(), new SimpleActorBehavior()::create,
+                                            Duration.ofSeconds(1)).toCompletableFuture().get();
     }
 
     @AfterEach
@@ -48,7 +48,8 @@ class ActorServiceTest {
 
     @Test
     void test_tell() throws Exception {
-        SimpleActorBehavior.PrintMessageCommand message = new SimpleActorBehavior.PrintMessageCommand("Hello, World!");
+        SimpleActorBehavior.PrintMessageCommand message = new SimpleActorBehavior.PrintMessageCommand(
+                "Hello, World!");
         actorService.tell(actorRef, message);
         Thread.sleep(500); // wait for message to be sent
         assertThat(SimpleActorBehavior.counterForTest).isEqualTo(1);
@@ -57,11 +58,9 @@ class ActorServiceTest {
     @Test
     void actors_with_same_path_should_not_be_created() throws Exception {
         final String childName = "same-child-actor-name";
-        actorService.createActor(childName, SimpleActorBehavior::create, Duration.ofSeconds(1))
+        actorService.createActor(childName, new SimpleActorBehavior()::create, Duration.ofSeconds(1))
                     .toCompletableFuture().get();
-        assertThrows(Exception.class,
-                     () -> actorService.createActor(childName, SimpleActorBehavior::create,
-                                                    Duration.ofSeconds(1)).toCompletableFuture().get());
+        assertThrows(Exception.class, () -> actorService.createActor(childName, new SimpleActorBehavior()::create, Duration.ofSeconds(1)).toCompletableFuture().get());
     }
 
     @Test
@@ -102,28 +101,26 @@ class SimpleActorBehavior {
 
     public static class StopCommand implements Command {}
 
-    public static String beanName() {
+    public String beanName() {
         return "system-simple-actor-behavior";
     }
 
-    public static Behavior<Command> create() {
+    public Behavior<Command> create() {
         return Behaviors.setup(
                 context ->
                         Behaviors.receive(Command.class)
-                                 .onMessage(PrintMessageCommand.class,
-                                            SimpleActorBehavior::handlePrintMessageCommand)
-                                 .onMessage(AskMessageCommand.class,
-                                            SimpleActorBehavior::handleAskMessageCommand)
+                                 .onMessage(PrintMessageCommand.class, this::handlePrintMessageCommand)
+                                 .onMessage(AskMessageCommand.class, this::handleAskMessageCommand)
                                  .onMessage(StopCommand.class, command -> Behaviors.stopped())
                                  .build());
     }
 
-    private static Behavior<Command> handlePrintMessageCommand(PrintMessageCommand command) {
+    private Behavior<Command> handlePrintMessageCommand(PrintMessageCommand command) {
         counterForTest++;
         return Behaviors.same();
     }
 
-    private static Behavior<Command> handleAskMessageCommand(AskMessageCommand<String> command) {
+    private Behavior<Command> handleAskMessageCommand(AskMessageCommand<String> command) {
         command.replyTo.tell("Received: " + command.message);
         return Behaviors.same();
     }

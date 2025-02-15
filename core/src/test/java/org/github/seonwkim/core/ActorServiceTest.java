@@ -33,12 +33,13 @@ class ActorServiceTest {
     @Autowired
     private ActorService actorService;
 
+    SimpleActorBehavior behavior;
     ActorRef<SimpleActorBehavior.Command> actorRef;
 
     @BeforeEach
     void setUp() throws Exception {
-        actorRef = actorService.createActor("child-actor-" + UUID.randomUUID(), new SimpleActorBehavior()::create,
-                                            Duration.ofSeconds(1)).toCompletableFuture().get();
+        behavior = new SimpleActorBehavior();
+        actorRef = actorService.createActor("child-actor-" + UUID.randomUUID(), behavior::create, Duration.ofSeconds(1)).toCompletableFuture().get();
     }
 
     @AfterEach
@@ -52,7 +53,7 @@ class ActorServiceTest {
                 "Hello, World!");
         actorService.tell(actorRef, message);
         Thread.sleep(500); // wait for message to be sent
-        assertThat(SimpleActorBehavior.counterForTest).isEqualTo(1);
+        assertThat(behavior.getCounterForTest()).isEqualTo(1);
     }
 
     @Test
@@ -77,7 +78,11 @@ class ActorServiceTest {
 
 class SimpleActorBehavior {
 
-    public static int counterForTest = 0;
+    public int counterForTest = 0;
+
+    public int getCounterForTest() {
+        return counterForTest;
+    }
 
     public interface Command {}
 

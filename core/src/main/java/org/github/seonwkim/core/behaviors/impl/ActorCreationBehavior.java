@@ -1,4 +1,4 @@
-package org.github.seonwkim.core.behaviors;
+package org.github.seonwkim.core.behaviors.impl;
 
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -7,10 +7,12 @@ import org.apache.pekko.actor.typed.ActorRef;
 import org.apache.pekko.actor.typed.Behavior;
 import org.apache.pekko.actor.typed.javadsl.ActorContext;
 import org.apache.pekko.actor.typed.javadsl.Behaviors;
+import org.github.seonwkim.core.behaviors.SingletonBehavior;
+import org.github.seonwkim.core.behaviors.impl.ActorCreationBehavior.Command;
 import org.springframework.stereotype.Component;
 
 @Component
-public class ActorCreationBehavior implements SingletonBehavior<ActorCreationBehavior.Command> {
+public class ActorCreationBehavior implements SingletonBehavior<Command> {
 
     public static final String BEAN_NAME = "system-actor-creation-behavior";
 

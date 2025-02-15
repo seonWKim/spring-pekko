@@ -2,7 +2,7 @@ package org.github.seonwkim.example.service;
 
 import org.github.seonwkim.core.ActorRefWrapper;
 import org.github.seonwkim.core.service.ActorService;
-import org.github.seonwkim.core.behaviors.ActorCreationBehavior;
+import org.github.seonwkim.core.behaviors.impl.ActorCreationBehavior;
 import org.springframework.stereotype.Service;
 
 @Service

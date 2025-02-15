@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.util.List;
 
 import org.github.seonwkim.core.ActorRefWrapper;
+import org.github.seonwkim.core.PekkoAutoConfiguration;
 import org.github.seonwkim.core.PekkoConfiguration;
 import org.github.seonwkim.core.behaviors.SingletonBehavior;
 import org.github.seonwkim.core.utils.SingletonBehaviorImplementation;
@@ -27,7 +28,7 @@ public class PekkoConfigurationTest {
 			},
 			locations = "")
 	@DirtiesContext
-	@SpringBootTest
+	@SpringBootTest(classes = { PekkoAutoConfiguration.class })
 	class TestNullableClusterConfiguration {
 
 		@Autowired private PekkoConfiguration pekkoConfiguration;
@@ -78,7 +79,7 @@ public class PekkoConfigurationTest {
 			},
 			locations = "")
 	@DirtiesContext
-	@SpringBootTest
+	@SpringBootTest(classes = { PekkoAutoConfiguration.class })
 	class TestPekkoConfiguration {
 
 		@Autowired private PekkoConfiguration pekkoConfiguration;

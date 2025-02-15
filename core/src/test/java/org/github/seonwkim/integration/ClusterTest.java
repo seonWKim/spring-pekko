@@ -6,19 +6,17 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.TestPropertySource;
 
-@SpringBootApplication(scanBasePackages = "org.github.seonwkim.core")
 public class ClusterTest {
 
     private static ConfigurableApplicationContext context1;
     private static ConfigurableApplicationContext context2;
     private static ConfigurableApplicationContext context3;
 
-    @SpringBootTest
+    @Configuration
     @TestPropertySource(
             properties = {
                     "server.port=16001",
@@ -35,7 +33,7 @@ public class ClusterTest {
     static class Application1Config {
     }
 
-    @SpringBootTest
+    @Configuration
     @TestPropertySource(
             properties = {
                     "server.port=16002",
@@ -52,7 +50,7 @@ public class ClusterTest {
     static class Application2Config {
     }
 
-    @SpringBootTest
+    @Configuration
     @TestPropertySource(
             properties = {
                     "server.port=16003",

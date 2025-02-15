@@ -10,6 +10,7 @@ import java.util.concurrent.CompletableFuture;
 import org.apache.pekko.actor.typed.ActorRef;
 import org.apache.pekko.actor.typed.Behavior;
 import org.apache.pekko.actor.typed.javadsl.Behaviors;
+import org.github.seonwkim.core.PekkoAutoConfiguration;
 import org.github.seonwkim.core.service.ActorService;
 import org.github.seonwkim.integration.SimpleActorBehavior.AskMessageCommand;
 import org.github.seonwkim.integration.SimpleActorBehavior.StopCommand;
@@ -26,7 +27,7 @@ import org.springframework.test.context.TestPropertySource;
                 "pekko.actor.provider=local",
         },
         locations = "")
-@SpringBootTest
+@SpringBootTest(classes = { PekkoAutoConfiguration.class })
 class ActorServiceTest {
 
     @Autowired

@@ -11,7 +11,7 @@ import org.apache.pekko.actor.typed.ActorRef;
 import org.apache.pekko.actor.typed.Behavior;
 import org.apache.pekko.actor.typed.javadsl.Behaviors;
 import org.github.seonwkim.core.PekkoAutoConfiguration;
-import org.github.seonwkim.core.service.ActorService;
+import org.github.seonwkim.core.service.ActorLocalService;
 import org.github.seonwkim.integration.SimpleActorBehavior.AskMessageCommand;
 import org.github.seonwkim.integration.SimpleActorBehavior.StopCommand;
 import org.junit.jupiter.api.AfterEach;
@@ -28,10 +28,10 @@ import org.springframework.test.context.TestPropertySource;
         },
         locations = "")
 @SpringBootTest(classes = { PekkoAutoConfiguration.class })
-class ActorServiceTest {
+class ActorLocalServiceTest {
 
     @Autowired
-    private ActorService actorService;
+    private ActorLocalService actorLocalService;
 
     SimpleActorBehavior behavior;
     ActorRef<SimpleActorBehavior.Command> actorRef;
@@ -39,19 +39,19 @@ class ActorServiceTest {
     @BeforeEach
     void setUp() throws Exception {
         behavior = new SimpleActorBehavior();
-        actorRef = actorService.createLocalActor("child-actor-" + UUID.randomUUID(), behavior::create, Duration.ofSeconds(1)).toCompletableFuture().get();
+        actorRef = actorLocalService.createLocalActor("child-actor-" + UUID.randomUUID(), behavior::create, Duration.ofSeconds(1)).toCompletableFuture().get();
     }
 
     @AfterEach
     void tearDown() {
-        actorService.tell(actorRef, new StopCommand());
+        actorLocalService.tell(actorRef, new StopCommand());
     }
 
     @Test
     void test_tell() throws Exception {
         SimpleActorBehavior.PrintMessageCommand message = new SimpleActorBehavior.PrintMessageCommand(
                 "Hello, World!");
-        actorService.tell(actorRef, message);
+        actorLocalService.tell(actorRef, message);
         Thread.sleep(500); // wait for message to be sent
         assertThat(behavior.getCounterForTest()).isEqualTo(1);
     }
@@ -59,14 +59,14 @@ class ActorServiceTest {
     @Test
     void actors_with_same_path_should_not_be_created() throws Exception {
         final String childName = "same-child-actor-name";
-        actorService.createLocalActor(childName, new SimpleActorBehavior()::create, Duration.ofSeconds(1))
-                    .toCompletableFuture().get();
-        assertThrows(Exception.class, () -> actorService.createLocalActor(childName, new SimpleActorBehavior()::create, Duration.ofSeconds(1)).toCompletableFuture().get());
+        actorLocalService.createLocalActor(childName, new SimpleActorBehavior()::create, Duration.ofSeconds(1))
+                         .toCompletableFuture().get();
+        assertThrows(Exception.class, () -> actorLocalService.createLocalActor(childName, new SimpleActorBehavior()::create, Duration.ofSeconds(1)).toCompletableFuture().get());
     }
 
     @Test
     void test_ask() throws Exception {
-        CompletableFuture<String> result = actorService.<SimpleActorBehavior.Command, String>ask(
+        CompletableFuture<String> result = actorLocalService.<SimpleActorBehavior.Command, String>ask(
                 actorRef,
                 replyTo -> new AskMessageCommand<>("Hello, World!", replyTo),
                 Duration.ofSeconds(5)

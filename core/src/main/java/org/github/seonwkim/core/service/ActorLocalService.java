@@ -20,21 +20,20 @@ import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.stereotype.Component;
 
 @Component
-public class ActorService {
+public class ActorLocalService {
 
     private final GenericApplicationContext genericApplicationContext;
     private final ActorSystem actorSystem;
-
     // lazily initialized
     private ActorRefWrapper<Command> actorCreationBehavior;
 
-    public ActorService(GenericApplicationContext genericApplicationContext, ActorSystem actorSystem) {
+    public ActorLocalService(GenericApplicationContext genericApplicationContext, ActorSystem actorSystem) {
         this.genericApplicationContext = genericApplicationContext;
         this.actorSystem = actorSystem;
     }
 
     @SuppressWarnings("unchcked")
-    public <T> ActorRefWrapper<T> getActorRefWrapper(String  beanName, Class<?> clazz) {
+    public <T> ActorRefWrapper<T> getActorRefWrapper(String beanName, Class<?> clazz) {
         return (ActorRefWrapper<T>) genericApplicationContext.getBean(beanName, clazz);
     }
 
@@ -54,7 +53,8 @@ public class ActorService {
         actorRef.tell(message);
     }
 
-    public <T, Q> CompletionStage<Q> ask(ActorRef<T> actorRef, Function<ActorRef<Q>, T> messageFactory, Duration timeout) {
+    public <T, Q> CompletionStage<Q> ask(ActorRef<T> actorRef, Function<ActorRef<Q>, T> messageFactory,
+                                         Duration timeout) {
         return AskPattern.ask(
                 actorRef,
                 messageFactory::apply,

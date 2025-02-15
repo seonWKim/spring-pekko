@@ -4,7 +4,6 @@ import java.util.List;
 
 import org.apache.pekko.actor.typed.ActorSystem;
 import org.apache.pekko.cluster.sharding.typed.javadsl.ClusterSharding;
-import org.apache.pekko.cluster.sharding.typed.javadsl.Entity;
 import org.github.seonwkim.core.behaviors.RootBehavior;
 import org.github.seonwkim.core.behaviors.ShardBehavior;
 import org.github.seonwkim.core.behaviors.impl.DefaultRootBehavior;
@@ -23,7 +22,8 @@ public class PekkoSystemConfiguration {
     public ActorSystem<?> actorSystem(DependencyContainer container, PekkoConfiguration pekkoConfig) {
         final Config config =
                 ConfigFactory.parseString(PekkoConfigurationUtils.toPropertiesString(pekkoConfig));
-        final String name = pekkoConfig.isClusterMode() ? pekkoConfig.getCluster().getName() : pekkoConfig.getName();
+        final String name =
+                pekkoConfig.isClusterMode() ? pekkoConfig.getCluster().getName() : pekkoConfig.getName();
         return ActorSystem.create(container.getNonClusterRootBehavior().create(container), name, config);
     }
 
@@ -37,20 +37,15 @@ public class PekkoSystemConfiguration {
     public PekkoClusterSharding pekkoClusterSharding(ActorSystem<?> actorSystem,
                                                      PekkoConfiguration configuration,
                                                      List<ShardBehavior<?>> shardBehaviors
-                                                     ) {
+    ) {
         if (configuration.isClusterMode()) {
-            ClusterSharding sharding = ClusterSharding.get(actorSystem);
+            final PekkoClusterSharding clusterSharding =
+                    new PekkoClusterSharding(ClusterSharding.get(actorSystem));
             for (ShardBehavior<?> shardBehavior : shardBehaviors) {
-                initEntity(sharding, shardBehavior);
+                clusterSharding.initEntity(shardBehavior);
             }
-            return new PekkoClusterSharding(ClusterSharding.get(actorSystem));
         }
 
         return new PekkoClusterSharding(null);
-    }
-
-    private <T> void initEntity(ClusterSharding clusterSharding, ShardBehavior<T> shardBehavior) {
-        clusterSharding.init(
-                Entity.of(shardBehavior.getEntityTypeKey(), shardBehavior::create));
     }
 }

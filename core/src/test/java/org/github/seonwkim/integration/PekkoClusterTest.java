@@ -2,22 +2,23 @@ package org.github.seonwkim.integration;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import org.apache.pekko.actor.typed.ActorRef;
-import org.github.seonwkim.core.PekkoAutoConfiguration;
-import org.github.seonwkim.core.service.ActorService;
-import org.github.seonwkim.integration.SimpleActorBehavior.Command;
+import org.apache.pekko.actor.typed.Behavior;
+import org.apache.pekko.actor.typed.javadsl.Behaviors;
+import org.apache.pekko.cluster.sharding.typed.ShardingMessageExtractor;
+import org.apache.pekko.cluster.sharding.typed.javadsl.EntityContext;
+import org.apache.pekko.cluster.sharding.typed.javadsl.EntityTypeKey;
+import org.github.seonwkim.core.behaviors.ShardBehavior;
+import org.github.seonwkim.core.service.ActorLocalService;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ConfigurableApplicationContext;
-import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.PropertySource;
-import org.springframework.test.context.TestPropertySource;
+import org.springframework.stereotype.Component;
 
-public class ClusterTest {
+public class PekkoClusterTest {
 
     private static ConfigurableApplicationContext context1;
     private static ConfigurableApplicationContext context2;
@@ -26,16 +27,84 @@ public class ClusterTest {
     @PropertySource("classpath:application1.properties")
     @SpringBootApplication(scanBasePackages = "org.github.seonwkim.core")
     static class Application1Config {
+        @Component
+        static class SimpleShardedBehavior extends CommonSimpleShardedBehavior {}
     }
 
     @PropertySource("classpath:application2.properties")
     @SpringBootApplication(scanBasePackages = "org.github.seonwkim.core")
     static class Application2Config {
+        @Component
+        static class SimpleShardedBehavior extends CommonSimpleShardedBehavior {}
     }
 
     @PropertySource("classpath:application3.properties")
     @SpringBootApplication(scanBasePackages = "org.github.seonwkim.core")
     static class Application3Config {
+        @Component
+        static class SimpleShardedBehavior extends CommonSimpleShardedBehavior {}
+    }
+
+    static class CommonSimpleShardedBehavior implements ShardBehavior<CommonSimpleShardedBehavior.Command> {
+
+        interface Command {}
+
+        public static class PrintMessageCommand implements Command {
+            private final String message;
+
+            public PrintMessageCommand(String message) {
+                this.message = message;
+            }
+
+            public String getMessage() {
+                return message;
+            }
+        }
+
+        private static final EntityTypeKey<Command> ENTITY_TYPE_KEY =
+                EntityTypeKey.create(Command.class, "SimpleShardedBehavior");
+
+        @Override
+        public EntityTypeKey<Command> getEntityTypeKey() {
+            return ENTITY_TYPE_KEY;
+        }
+
+        @Override
+        public Behavior<Command> create(EntityContext<Command> entityContext) {
+            return Behaviors.setup(
+                    context ->
+                            Behaviors.receive(Command.class)
+                                     .onMessage(PrintMessageCommand.class, cmd -> {
+                                         context.getLog().info("Received message: {}", cmd.getMessage());
+                                         return Behaviors.same();
+                                     })
+                                     .build());
+        }
+
+        @Override
+        public ShardingMessageExtractor<Command, Command> extractor() {
+            return new ShardingMessageExtractor<Command, Command>() {
+                private final int numberOfShards = 100; // Define the number of shards
+
+                @Override
+                public String entityId(Command message) {
+                    if (message instanceof PrintMessageCommand) {
+                        return ((PrintMessageCommand) message).getMessage();
+                    }
+                    return null;
+                }
+
+                @Override
+                public String shardId(String entityId) {
+                    return String.valueOf(entityId.hashCode() % numberOfShards);
+                }
+
+                @Override
+                public Command unwrapMessage(Command message) {
+                    return message;
+                }
+            };
+        }
     }
 
     @BeforeAll
@@ -59,9 +128,9 @@ public class ClusterTest {
     @Test
     public void test() throws Exception {
         // 1. Get ActorService from each context
-        ActorService actorService1 = context1.getBean(ActorService.class);
-        ActorService actorService2 = context2.getBean(ActorService.class);
-        ActorService actorService3 = context3.getBean(ActorService.class);
+        ActorLocalService actorLocalService1 = context1.getBean(ActorLocalService.class);
+        ActorLocalService actorLocalService2 = context2.getBean(ActorLocalService.class);
+        ActorLocalService actorLocalService3 = context3.getBean(ActorLocalService.class);
 
 //        // 2. Get sharded actors from ActorService
 //        ActorRef<Command> shardedActor1 = actorService1.getShardedActor("shard-1");

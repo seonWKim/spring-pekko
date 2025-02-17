@@ -24,13 +24,22 @@ public class PekkoSystemConfiguration {
                 ConfigFactory.parseString(PekkoConfigurationUtils.toPropertiesString(pekkoConfig));
         final String name =
                 pekkoConfig.isClusterMode() ? pekkoConfig.getCluster().getName() : pekkoConfig.getName();
-        return ActorSystem.create(container.getNonClusterRootBehavior().create(container), name, config);
+        return ActorSystem.create(container.getRootBehavior().create(container), name, config);
     }
 
     @Bean
     @ConditionalOnMissingBean(RootBehavior.class)
     public RootBehavior nonClusterRootBehavior() {
         return new DefaultRootBehavior();
+    }
+
+    @Bean
+    public PekkoCluster pekkoCluster(ActorSystem<?> actorSystem, PekkoConfiguration pekkoConfig) {
+        if (pekkoConfig.isClusterMode()) {
+            return new PekkoCluster(actorSystem);
+        }
+
+        return new PekkoCluster(null);
     }
 
     @Bean
@@ -44,6 +53,8 @@ public class PekkoSystemConfiguration {
             for (ShardBehavior<?> shardBehavior : shardBehaviors) {
                 clusterSharding.initEntity(shardBehavior);
             }
+
+            return clusterSharding;
         }
 
         return new PekkoClusterSharding(null);

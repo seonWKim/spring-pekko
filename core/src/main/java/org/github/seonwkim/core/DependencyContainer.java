@@ -25,7 +25,7 @@ public class DependencyContainer {
 		return applicationContext;
 	}
 
-	public RootBehavior getNonClusterRootBehavior() {
+	public RootBehavior getRootBehavior() {
 		return rootBehavior;
 	}
 

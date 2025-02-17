@@ -7,7 +7,7 @@
   - [ ] Create sharded actors with ease
 - [ ] Production ready features 
   - [ ] Configure cluster dynamically at runtime 
-
+- [ ] Refactor cluster settings 
 
 - register as bean 
   - find that specific actor easily 

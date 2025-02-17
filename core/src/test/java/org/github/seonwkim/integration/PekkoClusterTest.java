@@ -2,13 +2,27 @@ package org.github.seonwkim.integration;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import java.io.Serializable;
+import java.time.Duration;
+import java.util.Set;
+import java.util.concurrent.CompletionStage;
+import java.util.concurrent.atomic.AtomicInteger;
+
+import org.apache.pekko.actor.typed.ActorRef;
+import org.apache.pekko.actor.typed.ActorSystem;
 import org.apache.pekko.actor.typed.Behavior;
+import org.apache.pekko.actor.typed.javadsl.AskPattern;
 import org.apache.pekko.actor.typed.javadsl.Behaviors;
+import org.apache.pekko.cluster.Member;
 import org.apache.pekko.cluster.sharding.typed.ShardingMessageExtractor;
 import org.apache.pekko.cluster.sharding.typed.javadsl.EntityContext;
+import org.apache.pekko.cluster.sharding.typed.javadsl.EntityRef;
 import org.apache.pekko.cluster.sharding.typed.javadsl.EntityTypeKey;
 import org.github.seonwkim.core.behaviors.ShardBehavior;
-import org.github.seonwkim.core.service.ActorLocalService;
+import org.github.seonwkim.core.service.ActorClusterService;
+import org.github.seonwkim.integration.PekkoClusterTest.CommonSimpleShardedBehavior.GetStateCommand;
+import org.github.seonwkim.integration.PekkoClusterTest.CommonSimpleShardedBehavior.IncreaseCounter;
+import org.github.seonwkim.integration.PekkoClusterTest.CommonSimpleShardedBehavior.State;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -47,17 +61,33 @@ public class PekkoClusterTest {
 
     static class CommonSimpleShardedBehavior implements ShardBehavior<CommonSimpleShardedBehavior.Command> {
 
-        interface Command {}
+        interface Command extends Serializable {}
 
-        public static class PrintMessageCommand implements Command {
-            private final String message;
+        public static class IncreaseCounter implements Command {
+            public IncreaseCounter() {}
+        }
 
-            public PrintMessageCommand(String message) {
-                this.message = message;
+        public static class GetStateCommand implements Command {
+            private final ActorRef<State> replyTo;
+
+            public GetStateCommand(ActorRef<State> replyTo) {
+                this.replyTo = replyTo;
             }
 
-            public String getMessage() {
-                return message;
+            public ActorRef<State> getReplyTo() {
+                return replyTo;
+            }
+        }
+
+        public static class State implements Serializable {
+            private final int messageCount;
+
+            public State(int messageCount) {
+                this.messageCount = messageCount;
+            }
+
+            public int getMessageCount() {
+                return messageCount;
             }
         }
 
@@ -72,25 +102,30 @@ public class PekkoClusterTest {
         @Override
         public Behavior<Command> create(EntityContext<Command> entityContext) {
             return Behaviors.setup(
-                    context ->
-                            Behaviors.receive(Command.class)
-                                     .onMessage(PrintMessageCommand.class, cmd -> {
-                                         context.getLog().info("Received message: {}", cmd.getMessage());
-                                         return Behaviors.same();
-                                     })
-                                     .build());
+                    context -> {
+                        AtomicInteger messageCount = new AtomicInteger();
+                        return Behaviors.receive(Command.class)
+                                        .onMessage(IncreaseCounter.class, cmd -> {
+                                            messageCount.incrementAndGet();
+                                            context.getLog().info("Increasing counter");
+                                            return Behaviors.same();
+                                        })
+                                        .onMessage(GetStateCommand.class, cmd -> {
+                                            cmd.getReplyTo().tell(new State(messageCount.get()));
+                                            return Behaviors.same();
+                                        })
+                                        .build();
+                    }
+            );
         }
 
         @Override
         public ShardingMessageExtractor<Command, Command> extractor() {
             return new ShardingMessageExtractor<Command, Command>() {
-                private final int numberOfShards = 100; // Define the number of shards
+                private final int numberOfShards = 100;
 
                 @Override
                 public String entityId(Command message) {
-                    if (message instanceof PrintMessageCommand) {
-                        return ((PrintMessageCommand) message).getMessage();
-                    }
                     return null;
                 }
 
@@ -126,27 +161,59 @@ public class PekkoClusterTest {
     }
 
     @Test
-    public void test() throws Exception {
+    public void single_sharded_actor_across_cluster_test() throws Exception {
         // 1. Get ActorService from each context
-        ActorLocalService actorLocalService1 = context1.getBean(ActorLocalService.class);
-        ActorLocalService actorLocalService2 = context2.getBean(ActorLocalService.class);
-        ActorLocalService actorLocalService3 = context3.getBean(ActorLocalService.class);
+        ActorClusterService actorService1 = context1.getBean(ActorClusterService.class);
+        ActorClusterService actorService2 = context2.getBean(ActorClusterService.class);
+        ActorClusterService actorService3 = context3.getBean(ActorClusterService.class);
 
-//        // 2. Get sharded actors from ActorService
-//        ActorRef<Command> shardedActor1 = actorService1.getShardedActor("shard-1");
-//        ActorRef<SimpleActorBehavior.Command> shardedActor2 = actorService2.getShardedActor("shard-2");
-//        ActorRef<SimpleActorBehavior.Command> shardedActor3 = actorService3.getShardedActor("shard-3");
-//
-//        // 3. Send messages to sharded actors
-//        actorService1.tell(shardedActor1, new SimpleActorBehavior.PrintMessageCommand("Message to shard-1"));
-//        actorService2.tell(shardedActor2, new SimpleActorBehavior.PrintMessageCommand("Message to shard-2"));
-//        actorService3.tell(shardedActor3, new SimpleActorBehavior.PrintMessageCommand("Message to shard-3"));
-//
-//        // 4. Verify whether the sharded actors acted appropriately
-//        Thread.sleep(500); // wait for messages to be processed
-//        assertEquals(1, ((SimpleActorBehavior) shardedActor1.underlyingActor()).getCounterForTest());
-//        assertEquals(1, ((SimpleActorBehavior) shardedActor2.underlyingActor()).getCounterForTest());
-//        assertEquals(1, ((SimpleActorBehavior) shardedActor3.underlyingActor()).getCounterForTest());
+        // 2. Get the same sharded actor from each ActorService
+        EntityRef<CommonSimpleShardedBehavior.Command> shardedActor1 = actorService1.getShardedActor(
+                CommonSimpleShardedBehavior.ENTITY_TYPE_KEY, "shared-entity");
+        EntityRef<CommonSimpleShardedBehavior.Command> shardedActor2 = actorService2.getShardedActor(
+                CommonSimpleShardedBehavior.ENTITY_TYPE_KEY, "shared-entity");
+        EntityRef<CommonSimpleShardedBehavior.Command> shardedActor3 = actorService3.getShardedActor(
+                CommonSimpleShardedBehavior.ENTITY_TYPE_KEY, "shared-entity");
+
+        while (true) {
+            final Set<Member> members = scala.collection.JavaConverters.setAsJavaSet(actorService1.getClusterState().members());
+            if (members.size() != 3) {
+                continue;
+            }
+
+            boolean allMembersUp = true;
+            for (Member member : members) {
+                if (!actorService1.getClusterState().isMemberUp(member.address())) {
+                    allMembersUp = false;
+                    break;
+                }
+            }
+            if (allMembersUp) {
+                break;
+            }
+
+            Thread.sleep(1000);
+            System.out.println("Waiting for cluster to set up");
+        }
+
+        // 3. Send messages to the sharded actor from each ActorService
+        shardedActor1.tell(new IncreaseCounter());
+        shardedActor2.tell(new IncreaseCounter());
+        shardedActor3.tell(new IncreaseCounter());
+
+        // 4. Verify whether the sharded actor received all messages
+        Thread.sleep(500); // wait for messages to be processed
+
+        ActorSystem<?> actorSystem = context1.getBean(ActorSystem.class);
+        CompletionStage<State> stateFuture = AskPattern.ask(
+                shardedActor1,
+                GetStateCommand::new,
+                Duration.ofSeconds(3),
+                actorSystem.scheduler()
+        );
+
+        CommonSimpleShardedBehavior.State state = stateFuture.toCompletableFuture().get();
+        assertEquals(3, state.getMessageCount());
     }
 
     @AfterAll
